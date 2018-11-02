@@ -35,22 +35,50 @@ function renderShoppingList() {
   $('.js-shopping-list').html(shoppingListItemString);
 }
 
+function addItemToShoppingList(itemName) {
+  STORE.push({name: itemName, checked: false});
+}
+
 function handleNewItemSubmit() {
-
+  $('#js-shopping-list-form').submit( function(event) {
+    event.preventDefault();
+    
+    const newItem = $('.js-shopping-list-entry').val();
+    $('.js-shopping-list-entry').val('');
+    addItemToShoppingList(newItem);
+    renderShoppingList();
+  })
 }
 
-function handleItemClickChecked() {
-
+function toggleCheckedForListItem(itemIndex) {
+  console.log('toggled item');
+  STORE[itemIndex].checked = !STORE[itemIndex].checked;
 }
 
-function handleItemDeleteChecked() {
+function getItemIndexFromElement(item) {
+  const itemIndexString = $(item)
+    .closest('.js-item-index-element')
+    .attr('data-item-index');
+    return parseInt(itemIndexString, 10);
+}
+
+function handleItemCheckClicked() {
+  $('.js-shopping-list').on('click', '.js-item-toggle', event => {
+    const itemIndex = getItemIndexFromElement(event.currentTarget);
+    
+    toggleCheckedForListItem(itemIndex);
+    renderShoppingList();
+  });
+}
+
+function handleDeleteItemClicked() {
 
 }
 
 function handleShoppingList() {
   renderShoppingList();
-  handleItemClickChecked();
-  handleItemDeleteChecked();
+  handleItemCheckClicked();
+  handleDeleteItemClicked();
   handleNewItemSubmit();
 }
 
