@@ -1,12 +1,10 @@
 /*eslint-env jquery*/
 'use strict';
 
-const STORE = [
-  {name: 'apples', checked: false},
-  {name: 'oranges', checked: false},
-  {name: 'milk', checked: true},
-  {name: 'bread', checked: false}
-];
+const STORE = {
+  list: [{name: 'apples', checked: false}, {name: 'oranges', checked: false}, {name: 'milk', checked: true}, {name: 'bread', checked: false}],
+  hideCompleted: false
+};
 
 function generateItemElement(item, itemIndex, template) {
   return `
@@ -30,13 +28,15 @@ function generateShoppingItemString(shoppingList) {
 }
 
 function renderShoppingList() {
-  const shoppingListItemString = generateShoppingItemString(STORE);
+  let listFiltered = [...STORE.list];
+  if (STORE.hideCompleted) listFiltered = listFiltered.filter(item => !item.checked);
+  const shoppingListItemString = generateShoppingItemString(listFiltered);
 
   $('.js-shopping-list').html(shoppingListItemString);
 }
 
 function addItemToShoppingList(itemName) {
-  STORE.push({name: itemName, checked: false});
+  STORE.list.push({name: itemName, checked: false});
 }
 
 function handleNewItemSubmit() {
@@ -51,8 +51,8 @@ function handleNewItemSubmit() {
 }
 
 function toggleCheckedForListItem(itemIndex) {
-  console.log('toggled item');
-  STORE[itemIndex].checked = !STORE[itemIndex].checked;
+  // console.log('toggled item');
+  STORE.list[itemIndex].checked = !STORE.list[itemIndex].checked;
 }
 
 function getItemIndexFromElement(item) {
@@ -71,16 +71,27 @@ function handleItemCheckClicked() {
   });
 }
 
-function DeleteListItem(itemIndex) {
-  STORE.splice(itemIndex, 1);
+function deleteListItem(itemIndex) {
+  STORE.list.splice(itemIndex, 1);
 }
 
 function handleDeleteItemClicked() {
   $('.js-shopping-list').on('click', '.js-item-delete', event => {
     const itemIndex = getItemIndexFromElement(event.currentTarget);
     // console.log(itemIndex);
-    DeleteListItem(itemIndex);
+    deleteListItem(itemIndex);
     renderShoppingList();
+  });
+}
+
+function toggleHideComplete() {
+  STORE.hideCompleted = !STORE.hideCompleted;
+  renderShoppingList();
+}
+
+function handleHideCompleteClicked() {
+  $('#toggle-filter-completed').on('click', event => {
+    toggleHideComplete();
   });
 }
 
@@ -89,6 +100,7 @@ function handleShoppingList() {
   handleItemCheckClicked();
   handleDeleteItemClicked();
   handleNewItemSubmit();
+  handleHideCompleteClicked();
 }
 
 $(handleShoppingList);
