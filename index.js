@@ -36,7 +36,7 @@ function generateShoppingItemString(shoppingList) {
 function renderShoppingList() {
   let listFiltered = [...STORE.list];
   if (STORE.hideCompleted) listFiltered = listFiltered.filter(item => !item.checked);
-  if (STORE.searchTerm) listFiltered = listFiltered.filter(item => item.name === STORE.searchTerm);
+  if (STORE.searchTerm) listFiltered = listFiltered.filter(item => item.name.includes(STORE.searchTerm));
   const shoppingListItemString = generateShoppingItemString(listFiltered);
 
   $('.js-shopping-list').html(shoppingListItemString);
