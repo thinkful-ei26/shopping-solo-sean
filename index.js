@@ -45,9 +45,9 @@ function handleNewItemSubmit() {
     
     const newItem = $('.js-shopping-list-entry').val();
     $('.js-shopping-list-entry').val('');
-    addItemToShoppingList(newItem);
+    if (newItem) addItemToShoppingList(newItem); // does not add item if the input was empty
     renderShoppingList();
-  })
+  });
 }
 
 function toggleCheckedForListItem(itemIndex) {
@@ -59,7 +59,7 @@ function getItemIndexFromElement(item) {
   const itemIndexString = $(item)
     .closest('.js-item-index-element')
     .attr('data-item-index');
-    return parseInt(itemIndexString, 10);
+  return parseInt(itemIndexString, 10);
 }
 
 function handleItemCheckClicked() {
@@ -71,8 +71,17 @@ function handleItemCheckClicked() {
   });
 }
 
-function handleDeleteItemClicked() {
+function DeleteListItem(itemIndex) {
+  STORE.splice(itemIndex, 1);
+}
 
+function handleDeleteItemClicked() {
+  $('.js-shopping-list').on('click', '.js-item-delete', event => {
+    const itemIndex = getItemIndexFromElement(event.currentTarget);
+    // console.log(itemIndex);
+    DeleteListItem(itemIndex);
+    renderShoppingList();
+  });
 }
 
 function handleShoppingList() {
