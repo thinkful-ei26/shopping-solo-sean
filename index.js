@@ -3,10 +3,11 @@
 
 const STORE = {
   list: [{name: 'apples', checked: false}, {name: 'oranges', checked: false}, {name: 'milk', checked: true}, {name: 'bread', checked: false}],
-  hideCompleted: false
+  hideCompleted: false,
+  searchTerm: null
 };
 
-function generateItemElement(item, itemIndex, template) {
+function generateItemElement(item, itemIndex) {
   return `
     <li class="js-item-index-element" data-item-index="${itemIndex}">
       <span class="shopping-item js-shopping-item ${item.checked ? 'shopping-item__checked' : ''}">${item.name}</span>
@@ -23,13 +24,19 @@ function generateItemElement(item, itemIndex, template) {
 }
 
 function generateShoppingItemString(shoppingList) {
-  const items = shoppingList.map((item, index) => generateItemElement(item, index));
+  // const items = shoppingList.map((item, index) => generateItemElement(item, index));
+  const items = shoppingList.map((item) => generateItemElement(item, STORE.list.findIndex(element => element.name === item.name)));
+  // because this is called with a filtered list, generateItemElement needs to receive the index of the element from the
+  // original list
+  // .findIndex() is only a partial solution, because if two elements exist with the same name, it only returns the first
+  // I've decided to disallow duplicate names
   return items.join('');
 }
 
 function renderShoppingList() {
   let listFiltered = [...STORE.list];
   if (STORE.hideCompleted) listFiltered = listFiltered.filter(item => !item.checked);
+  if (STORE.searchTerm) listFiltered = listFiltered.filter(item => item.name === STORE.searchTerm);
   const shoppingListItemString = generateShoppingItemString(listFiltered);
 
   $('.js-shopping-list').html(shoppingListItemString);
@@ -45,7 +52,11 @@ function handleNewItemSubmit() {
     
     const newItem = $('.js-shopping-list-entry').val();
     $('.js-shopping-list-entry').val('');
-    if (newItem) addItemToShoppingList(newItem); // does not add item if the input was empty
+    let isDuplicate = false;
+    STORE.list.forEach(element => {if (newItem === element.name) isDuplicate = true;});
+    // console.log(isDuplicate);
+    if (isDuplicate) window.alert('Duplicate item disallowed');
+    if (newItem && !isDuplicate) addItemToShoppingList(newItem); // does not add item if the input was empty
     renderShoppingList();
   });
 }
@@ -86,12 +97,27 @@ function handleDeleteItemClicked() {
 
 function toggleHideComplete() {
   STORE.hideCompleted = !STORE.hideCompleted;
-  renderShoppingList();
 }
 
 function handleHideCompleteClicked() {
-  $('#toggle-filter-completed').on('click', event => {
+  $('#toggle-filter-completed').on('click', () => {
     toggleHideComplete();
+    renderShoppingList();
+  });
+}
+
+function search(searchTerm) {
+  STORE.searchTerm = searchTerm;
+}
+
+function handleSearchSubmit() {
+  $('#search-form').submit(event => {
+    event.preventDefault();
+    const term = $('.js-search-entry').val();
+    // console.log(term);
+    if (term) search(term);
+    else search(undefined); // reset STORE.searchTerm if search is empty
+    renderShoppingList();
   });
 }
 
@@ -99,8 +125,10 @@ function handleShoppingList() {
   renderShoppingList();
   handleItemCheckClicked();
   handleDeleteItemClicked();
+  // try {handleNewItemSubmit();} catch (e) {};
   handleNewItemSubmit();
   handleHideCompleteClicked();
+  handleSearchSubmit();
 }
 
 $(handleShoppingList);
